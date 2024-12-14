@@ -9,3 +9,4 @@ langchain-cli==0.0.35
 langchain-community==0.3.11
 langchain_text_splitters==0.3.2
 PyMuPDF==1.25.0
+motor==3.6.0
