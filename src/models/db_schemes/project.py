@@ -4,4 +4,5 @@ from typing import Optional
 
 class project(BaseModel):
 
-    _id: Optional(ObjectId)
+    _id: Optional[ObjectId]
+    project: str
