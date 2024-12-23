@@ -9,9 +9,8 @@ import logging
 from routes.schemes import ProcessRequest
 from models.ProjectModel import ProjectModel
 from models.ChunkModel import ChunkModel
-from models.db_schemes.data_chunk import DataChunk
+from models.db_schemes import DataChunk
 from models.enums import ResponseEnums
-# from bson.objectid import ObjectId
 
 logger = logging.getLogger("uvicorn.error")
 
@@ -24,7 +23,7 @@ data_router = APIRouter(
 async def upload_data( request: Request, project_id: str , file: UploadFile,
                       app_settings: Settings = Depends(get_settings)):
     
-    project_model = ProjectModel( db_client = request.app.db_client )
+    project_model = await ProjectModel.create_instance( db_client = request.app.db_client )
 
     project = await project_model.get_project_or_create_one(project_id)
 
@@ -66,7 +65,7 @@ async def upload_data( request: Request, project_id: str , file: UploadFile,
 @data_router.post("/process/{project_id}")
 async def process_endpoint(request: Request, project_id: str, process_request: ProcessRequest):
     
-    project_model = ProjectModel( db_client = request.app.db_client )
+    project_model = await ProjectModel.create_instance( db_client = request.app.db_client )
 
     project = await project_model.get_project_or_create_one(project_id)
 
@@ -75,7 +74,7 @@ async def process_endpoint(request: Request, project_id: str, process_request: P
     chunk_overlap = process_request.overlap_size
     chunk_reset = process_request.do_reset
 
-    chunk_model = ChunkModel(db_client = request.app.db_client)
+    chunk_model = await ChunkModel.create_instance(db_client = request.app.db_client)
 
     if chunk_reset == 1:
         _ = await chunk_model.delete_chunks_by_project_id(project.id)
@@ -114,4 +113,9 @@ async def process_endpoint(request: Request, project_id: str, process_request: P
 
     no_records = await chunk_model.insert_many_chunks(chunks = file_chunks_records)
 
-    return no_records
+    return JSONResponse(
+            content = {
+                "result_signal" : ResponseSignal.FILE_PROCESS_SUCCESS.value,
+                "inserted_chunks" : no_records
+                }
+        )
