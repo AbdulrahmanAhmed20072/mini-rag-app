@@ -44,7 +44,9 @@ class ChunkModel(BaseDataModel):
     
     async def get_chunk(self, chunk_id: str):
 
-        result = await self.collection.find_one({"_id" : ObjectId(chunk_id)})
+        result = await self.collection.find_one({
+            "_id" : ObjectId(chunk_id) if isinstance(chunk_id, str) else chunk_id
+            })
 
         return DataChunk(**result)
     
