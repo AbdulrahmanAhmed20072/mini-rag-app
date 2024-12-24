@@ -4,13 +4,11 @@ from helpers.config import get_settings, Settings
 from controllers import DataController, ProjectController, ProcessController, BaseController
 import aiofiles
 import os
-from models import ResponseSignal
 import logging
 from routes.schemes import ProcessRequest
-from models.ProjectModel import ProjectModel
-from models.ChunkModel import ChunkModel
-from models.db_schemes import DataChunk
-from models.enums import ResponseEnums
+from models.enums import ResponseSignal, ResponseEnums, AssetTypeEnum
+from models.db_schemes import DataChunk, Asset
+from models import ProjectModel, ChunkModel, AssetModel
 
 logger = logging.getLogger("uvicorn.error")
 
@@ -37,7 +35,7 @@ async def upload_data( request: Request, project_id: str , file: UploadFile,
             content = {"result_signal" : result_signal}
         )
     
-    # project_dir_path = ProjectController().get_project_path(project_id = project_id)
+    project_dir_path = ProjectController().get_project_path(project_id = project_id)
 
     file_path, file_id = Data_Controller.generate_unique_filepath(
         orig_file_name = file.filename , project_id = project_id)
@@ -55,10 +53,21 @@ async def upload_data( request: Request, project_id: str , file: UploadFile,
             content = {"result_signal" : ResponseSignal.FILE_UPLOAD_FAILED.value}
         )
 
+    asset_resources = Asset(
+        asset_project_id = project.id,
+        asset_type = AssetTypeEnum.FILE.value,
+        asset_name = file_id,
+        asset_size = os.path.getsize(file_path)
+    )
+
+    asset_model = await AssetModel.create_instance(request.app.db_client)
+    asset_record = await asset_model.create_asset(asset = asset_resources)
+
     return JSONResponse(
             content = {"result_signal" : ResponseSignal.FILE_UPLOAD_SUCCESS.value,
                        "file_id" : file_id, 
                        "project_id": str(project.id),
+                       "asset_id" : str(asset_record.id),
                        }
         )
 
