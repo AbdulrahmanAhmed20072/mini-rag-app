@@ -10,3 +10,5 @@ class ResponseSignal(Enum):
     FILE_PROCESS_FAILED = "process_failed"
     FILE_PROCESS_SUCCESS = "process_success"
     FILE_PROCESS_NOT_FOUND = "process_file_not_found"
+    NO_FILES_ERROR = "not_found_files"
+    FILE_ID_ERROR = "no_file_found_with_this_id"
