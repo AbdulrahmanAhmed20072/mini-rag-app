@@ -47,8 +47,6 @@ class OpenAIProvider(LLMInterface):
     def generate_text(self, prompt: str, chat_history: list = [], max_output_token: int = None,
                             temperature: float = None):
 
-        print("#######",self.api_url)
-
         if not self.client:
             self.logger.error("OpenAI client was not set")
             return None
