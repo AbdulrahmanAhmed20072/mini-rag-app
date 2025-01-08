@@ -1,6 +1,7 @@
 from ..LLMInterface import LLMInterface
 from openai import OpenAI
 import logging
+from enum import Enum
 from ..LLMEnums import OpenAIEnums
 
 class OpenAIProvider(LLMInterface):
@@ -24,9 +25,10 @@ class OpenAIProvider(LLMInterface):
 
         self.client = OpenAI(
             api_key = self.api_key,
-            api_url = self.api_url
+            base_url = self.api_url if self.api_url and len(self.api_url) else None
         )
 
+        self.enums = OpenAIEnums
         self.logger = logging.getLogger(__name__)
 
     def set_generation_model(self, model_id: str):
@@ -45,6 +47,8 @@ class OpenAIProvider(LLMInterface):
     def generate_text(self, prompt: str, chat_history: list = [], max_output_token: int = None,
                             temperature: float = None):
 
+        print("#######",self.api_url)
+
         if not self.client:
             self.logger.error("OpenAI client was not set")
             return None
@@ -57,7 +61,7 @@ class OpenAIProvider(LLMInterface):
         temperature = temperature if temperature else self.default_generation_temperature
 
         chat_history.append(
-            self.construct_prompt(prompt = prompt, role = OpenAIEnums.USER.value)
+            self.construct_prompt(prompt = prompt, role = self.enums.USER.value)
         )
 
         response = self.client.chat.completions.create(
@@ -97,6 +101,6 @@ class OpenAIProvider(LLMInterface):
     def construct_prompt(self, prompt: str, role: str):
         
         return {
-            "role" : role,
+            "role": role.value if isinstance(role, Enum) else role,
             "content" : self.process_text(prompt)
         }
