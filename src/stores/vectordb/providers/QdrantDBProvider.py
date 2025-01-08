@@ -1,6 +1,7 @@
 from qdrant_client import QdrantClient, models
 from ..VectorDBInterface import VectorDBInterface
 from ..VectorDBEnums import DistanceMethodEnums
+from models.db_schemes import RetrievedDocument
 import logging
 from typing import List
 
@@ -20,6 +21,7 @@ class QdrantDBProvider(VectorDBInterface):
 
     def connect(self):
         self.client = QdrantClient(path = self.db_path)
+        return self.client
     
     def disconnect(self):
         return None
@@ -94,20 +96,23 @@ class QdrantDBProvider(VectorDBInterface):
         # if metadatas was None convert it to list of None so we can iterate
         metadatas = [None] * len(metadatas) if not metadatas else metadatas
         # if record_ids was None convert it to list of None so we can iterate
-        record_ids = [None] * len(record_ids) if not record_ids else record_ids
+        record_ids = list(0, range(record_ids)) * len(record_ids) if not record_ids else record_ids
 
         for i in range(0, len(vectors), batch_size):
 
             batch_texts = texts[i : i + batch_size]
             batch_vectors = vectors[i : i + batch_size]
             batch_metadatas = metadatas[i : i + batch_size]
+            batch_record_ids = record_ids[i : i + batch_size]
 
             batch_record = [
 
                 models.Record(
+                    id = batch_record_ids[i],
                     vector = batch_vectors[i],
                     payload = {
-                        "text" : batch_texts[i], "metadata" : batch_metadatas[i]
+                        "text" : batch_texts[i],
+                        "metadata" : batch_metadatas[i],
                     }
                 )
 
@@ -115,12 +120,11 @@ class QdrantDBProvider(VectorDBInterface):
             ]
 
             try :
-
                 _ = self.client.upload_records(
                         collection_name = collection_name,
-                        records = [batch_record]
+                        records = batch_record
                         )
-            
+
             except Exception as e:
                 self.logger.error(f"error while inserting batch: {e}")
                 return False
@@ -129,8 +133,21 @@ class QdrantDBProvider(VectorDBInterface):
     
     def search_by_vector(self, collection_name: str, vector: list, limit: int = 5):
         
-        return self.client.search(
+        results = self.client.search(
             collection_name = collection_name,
-            vector = vector,
+            query_vector = vector,
             limit = limit
         )
+
+        if not results or len(results) == 0:
+            return None
+
+        return [
+
+            RetrievedDocument(**{
+                "score" : res.score,
+                "text": res.payload["text"]
+            })
+
+            for res in results
+        ]
