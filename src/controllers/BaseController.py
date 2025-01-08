@@ -22,7 +22,7 @@ class BaseController:
         # generating random strings
         return ''.join(random.choices(string.ascii_letters, k = length))
     
-    def get_database_path(self, db_name):
+    def get_database_path(self, db_name: str):
 
         database_path = os.path.join(
             self.database_dir, db_name)
