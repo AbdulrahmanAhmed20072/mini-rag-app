@@ -1,6 +1,7 @@
 from ..LLMInterface import LLMInterface
 import cohere
 import logging
+from enum import Enum
 from ..LLMEnums import CohereEnums, DocumentTypeEnum
 
 class CoHereProvider(LLMInterface):
@@ -23,6 +24,7 @@ class CoHereProvider(LLMInterface):
 
         self.client = cohere.ClientV2(api_key = self.api_key)
 
+        self.enums = CohereEnums
         self.logger = logging.getLogger(__name__)
 
     def set_generation_model(self, model_id: str):
@@ -52,7 +54,7 @@ class CoHereProvider(LLMInterface):
         temperature = temperature if temperature else self.default_generation_temperature
 
         chat_history.append(
-            self.construct_prompt(prompt = prompt, role = CohereEnums.USER.value)
+            self.construct_prompt(prompt = prompt, role = self.enums.USER.value)
         )
         
         response = self.client.chat(
@@ -79,7 +81,7 @@ class CoHereProvider(LLMInterface):
             self.logger.error("embedding model for CoHere was not set")
             return None
         
-        input_type = CohereEnums.DOCUMENT if document_type == DocumentTypeEnum.DOCUMENT else CohereEnums.QUERY
+        input_type = self.enums.DOCUMENT.value if document_type == DocumentTypeEnum.DOCUMENT.value else self.enums.QUERY.value
 
         response = self.client.embed(
             model = self.embedding_model_id,
@@ -96,6 +98,6 @@ class CoHereProvider(LLMInterface):
 
     def construct_prompt(self, prompt: str, role: str):
         return {
-            "role" : role,
+            "role": role.value if isinstance(role, Enum) else role,
             "content" : self.process_text(prompt)
         }
