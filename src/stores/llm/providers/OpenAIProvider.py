@@ -54,7 +54,7 @@ class OpenAIProvider(LLMInterface):
         if not self.generation_model_id:
             self.logger.error("Gereration model for OpenAI was not set")
             return None
-        
+
         max_output_token = max_output_token if max_output_token else self.default_generation_max_output_tokens
         temperature = temperature if temperature else self.default_generation_temperature
 
@@ -73,7 +73,7 @@ class OpenAIProvider(LLMInterface):
             self.logger.error("Error while generation text with OpenAI")
             return None
         
-        return response.choices[0].message["content"]
+        return response.choices[0].message.content
 
     def embed_text(self, text: str, document_type: str = None):
 
