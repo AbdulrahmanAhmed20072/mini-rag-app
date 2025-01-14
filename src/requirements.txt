@@ -13,3 +13,7 @@ motor==3.6.0
 openai==1.58.1
 cohere==5.13.4
 qdrant-client==1.12.2
+transformers==4.48.0
+torch==2.5.1
+tensorflow==2.18.0
+tf-keras==2.18.0
