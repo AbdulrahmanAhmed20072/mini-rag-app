@@ -166,7 +166,7 @@ async def answer_rag(request: Request, project_id: str, search_request: SearchRe
     
     answer, full_prompt, chat_history = nlp_controller.answer_rag_question(
         project = project, query = search_request.text, limit = search_request.limit)
-    
+
     if not answer:
         return JSONResponse(
             status_code = status.HTTP_400_BAD_REQUEST,
@@ -183,7 +183,3 @@ async def answer_rag(request: Request, project_id: str, search_request: SearchRe
                 "chat_history" : chat_history
             }
         )
-
-# [{'role': <CohereEnums.SYSTEM: 'system'>, 
-#   'content': "You are an assistant to generate a response for the user.\nYou will be provided by a set of documents associated with the user's query.\nYou have to generate a response based on the documents provided."},
-# {'role': 'user', 'content': '## Document No: 1\n### Content: Society called him Handsome Signoles. His name was Viscount Gontran-Joseph de Signoles.\n\nBased only on the above documents, please generate an answer for the user.\n## Answer:'}]
