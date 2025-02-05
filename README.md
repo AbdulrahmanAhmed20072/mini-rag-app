@@ -47,16 +47,16 @@ OPENAI_API_KEY=your-api-key-here
 
 1. Navigate to the `docker` directory:
    ```bash
-   cd docker
+   $ cd docker
    ```
 2. Copy the example `.env` file and update it:
    ```bash
-   cp .env.example .env
+   $ cp .env.example .env
    ```
 3. Modify `.env` with your credentials.
 4. Start the Docker services:
    ```bash
-   sudo docker compose up -d
+   $ sudo docker compose up -d
    ```
 
 ## Run the FastAPI Server
@@ -66,4 +66,4 @@ $ uvicorn main:app --reload --host 0.0.0.0 --port 5000
 
 ## POSTMAN Collection
 You can import the Postman collection from:
-[assets/mini-rag-app.postman_collection.json](./assets/mini-rag-app.postman_collection.json)
+[src/assets/mini-rag-app.postman_collection.json](https://github.com/AbdulrahmanAhmed20072/mini-rag-app/blob/b99c12058703c1aebe54ae9dbd92497904079b2d/src/assets/mini-rag-app.postman_collection.json)
